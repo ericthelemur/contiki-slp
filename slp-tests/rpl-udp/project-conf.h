@@ -3,4 +3,4 @@
 // #define LOG_CONF_LEVEL_MAC LOG_LEVEL_DBG
 
 #define LOG_CONF_WITH_ANNOTATE 1
-#define SEND_INTERVAL (CLOCK_SECOND / 1)
+#define SEND_INTERVAL (unsigned long) (CLOCK_SECOND / 1)
