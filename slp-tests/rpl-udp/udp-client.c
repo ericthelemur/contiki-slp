@@ -22,15 +22,8 @@ PROCESS(udp_client_process, "UDP client");
 AUTOSTART_PROCESSES(&udp_client_process);
 /*---------------------------------------------------------------------------*/
 static void
-udp_rx_callback(struct simple_udp_connection *c,
-         const uip_ipaddr_t *sender_addr,
-         uint16_t sender_port,
-         const uip_ipaddr_t *receiver_addr,
-         uint16_t receiver_port,
-         const uint8_t *data,
-         uint16_t datalen)
-{
-
+udp_rx_callback(struct simple_udp_connection *c, const uip_ipaddr_t *sender_addr, uint16_t sender_port,
+         const uip_ipaddr_t *receiver_addr, uint16_t receiver_port, const uint8_t *data, uint16_t datalen) {
   LOG_INFO("Received response '%.*s' from ", datalen, (char *) data);
   LOG_INFO_6ADDR(sender_addr);
 #if LLSEC802154_CONF_ENABLED
@@ -47,13 +40,10 @@ PROCESS_THREAD(udp_client_process, ev, data)
   static char str[32];
   uip_ipaddr_t dest_ipaddr;
 
-  LOG_INFO("send int %lu\n", SEND_INTERVAL);
-
   PROCESS_BEGIN();
 
   /* Initialize UDP connection */
-  simple_udp_register(&udp_conn, UDP_CLIENT_PORT, NULL,
-                      UDP_SERVER_PORT, udp_rx_callback);
+  simple_udp_register(&udp_conn, UDP_CLIENT_PORT, NULL, UDP_SERVER_PORT, udp_rx_callback);
 
   etimer_set(&periodic_timer, random_rand() % SEND_INTERVAL);
   while(1) {

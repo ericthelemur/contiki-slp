@@ -180,3 +180,11 @@
 ##### "LOG_CONF_LEVEL_SNMP": ___________________ == LOG_CONF_LEVEL_SNMP
 ##### "LOG_CONF_LEVEL_LWM2M": __________________ == LOG_CONF_LEVEL_LWM2M
 ##### "LOG_CONF_LEVEL_MAIN": ___________________ == LOG_CONF_LEVEL_MAIN
+
+#ifdef SEND_INTERVAL
+##### "SEND_INTERVAL": _________________________ == SEND_INTERVAL
+#else
+##### "SEND_INTERVAL": _________________________ ><
+#endif
+
+##### "CONTIKI_VERSION_STRING": ________________ == CONTIKI_VERSION_STRING

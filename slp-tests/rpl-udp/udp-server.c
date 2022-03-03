@@ -1,3 +1,5 @@
+#define RPL_CONF_GROUNDED 1
+
 #include "contiki.h"
 #include "net/routing/routing.h"
 #include "net/netstack.h"
