@@ -22,13 +22,10 @@ PROCESS(udp_client_process, "UDP client");
 AUTOSTART_PROCESSES(&udp_client_process);
 /*---------------------------------------------------------------------------*/
 
-#define XSTR(x) STR(x)
-#define STR(x) #x
-
 #if RADIO_OFF_SLP
 
 #pragma message "Radio disable SLP is ENABLED as " XSTR(RADIO_OFF_SLP)
-#if RADIO_OFF_SLP == RADOFF_COUNTER
+#if RADIO_OFF_SLP == RADOFF_SLP_COUNTER
 static int count = 0;
 #elif RADIO_OFF_SLP == RADOFF_SLP_RANDINIT_COUNTER
 static int count = -1;
@@ -39,6 +36,7 @@ static double prob = OFF_TIMER_BASE_PROB;
 static struct ctimer off_timer;
 static struct ctimer to_off_timer;
 
+// Switch on and off functions, just used for the ctimers now, as using ip processors to "disable"
 static void switch_on() {
   LOG_INFO("Radio back on\n");
   // NETSTACK_RADIO.on();
@@ -50,6 +48,7 @@ static void switch_off() {
   // NETSTACK_RADIO.off();
 }
 
+// Incoming packet processor, discards if timers going, and checks disable policy
 static enum netstack_ip_action ip_input(void) {
   uint8_t proto = 0;
   uipbuf_get_last_header(uip_buf, uip_len, &proto); // Get protocol (is UDP)
@@ -65,11 +64,11 @@ static enum netstack_ip_action ip_input(void) {
   if (proto == UIP_PROTO_UDP) {
 
 #if RADIO_OFF_SLP == RADOFF_SLP_RAND
-    double r = (double) random_rand() / (double) RAND_MAX;  // Random float in [1, 0]
+    double r = (double) random_rand() / (double) RAND_MAX;  // Random float in [0, 1]
     LOG_INFO("Random %lf threshold %lf\n", r, OFF_TIMER_PROB);
     if (r < OFF_TIMER_PROB) {
 #elif RADIO_OFF_SLP == RADOFF_SLP_CUMUL_RAND
-    double r = (double) random_rand() / (double) RAND_MAX;  // Random float in [1, 0]
+    double r = (double) random_rand() / (double) RAND_MAX;  // Random float in [0, 1]
     prob *= OFF_TIMER_MULTIPLIER;
     LOG_INFO("Random %lf threshold %lf\n", r, prob);
     if (r < prob) {
@@ -80,7 +79,7 @@ static enum netstack_ip_action ip_input(void) {
     if (count >= OFF_TIMER_THRESHOLD) {
       count = 0;
 #elif RADIO_OFF_SLP == RADOFF_SLP_RANDINIT_COUNTER
-    if (count == -1) messages = random_rand() % OFF_TIMER_THRESHOLD;  // Initialize to random
+    if (count == -1) count = random_rand() % OFF_TIMER_THRESHOLD;  // Initialize to random
     count++;
     LOG_INFO("Count %d threshold %d\n", count, OFF_TIMER_THRESHOLD);
     if (count >= OFF_TIMER_THRESHOLD) {
@@ -88,7 +87,7 @@ static enum netstack_ip_action ip_input(void) {
 #else
     #error "ERROR: Unknown RADIO_OFF_SLP"
 #endif
-
+      // Disable policy passed, disabling
       LOG_INFO("Reached threshold");
       NETSTACK_ROUTING.leave_network();
 
@@ -98,7 +97,7 @@ static enum netstack_ip_action ip_input(void) {
   return NETSTACK_IP_PROCESS;
 }
 
-
+// Outgoing packet processor, cancel if still going
 static enum netstack_ip_action ip_output(const linkaddr_t *localdest) {
   uint8_t proto = 0;
   uipbuf_get_last_header(uip_buf, uip_len, &proto); // Check protocol is UDP
@@ -110,6 +109,7 @@ static enum netstack_ip_action ip_output(const linkaddr_t *localdest) {
   }
   return NETSTACK_IP_PROCESS;
 }
+
 struct netstack_ip_packet_processor packet_processor = {
   .process_input = ip_input,
   .process_output = ip_output

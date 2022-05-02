@@ -1,12 +1,12 @@
 
-#define LOG_CONF_LEVEL_RPL LOG_LEVEL_DBG
+// #define LOG_CONF_LEVEL_RPL LOG_LEVEL_DBG
 // #define LOG_CONF_LEVEL_MAC LOG_LEVEL_DBG
 #define RPL_CONF_GROUNDED 1
 
+// Generates logging messages that Cooja can use to display graph.
 #define LOG_CONF_WITH_ANNOTATE 1
 
-#define RPL_CONF_MOP RPL_MOP_NON_STORING
-
+// Disable policies
 #define RADOFF_SLP_NONE 0
 #define RADOFF_SLP_RAND 1
 #define RADOFF_SLP_CUMUL_RAND 2
@@ -14,7 +14,7 @@
 #define RADOFF_SLP_RANDINIT_COUNTER 4
 
 
-// TO CHANGE
+// TO CHANGE set properties here
 #define SEND_INTERVAL (unsigned long) (CLOCK_SECOND / 0.1)
 #define RADIO_OFF_SLP RADOFF_SLP_RAND
 #define RADIO_OFF_PROB 1.0
@@ -35,9 +35,10 @@
 
 // Don't Change
 
-// #define RADOFF_HAS_COUNTER (RADIO_OFF_SLP == RADOFF_SLP_CUMUL_RAND || RADIO_OFF_SLP == RADOFF_SLP_COUNTER || RADIO_OFF_SLP == RADOFF_SLP_RANDINIT_COUNTER)
+// Storing mode is unnecessary, as only upward routing
+#define RPL_CONF_MOP RPL_MOP_NON_STORING
 
-
+// Disable 
 #define RPL_CONF_WITH_PROBING 0
 #define RPL_CONF_WITH_DAO_ACK 0
 #define RPL_CONF_DELAY_BEFORE_LEAVING 5 * CLOCK_SECOND
